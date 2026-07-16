@@ -8,6 +8,18 @@ type FidgetSubTab = 'switchboard' | 'bubblewrap' | 'particles';
 // Synthesize satisfying sounds using the Web Audio API (No large file downloads!)
 const playSound = (type: 'click' | 'toggle' | 'tick' | 'pop' | 'sweep') => {
   if (typeof window === 'undefined') return;
+
+  // Haptic vibration feedback for mobile devices (progressive enhancement)
+  if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+    try {
+      if (type === 'click') navigator.vibrate(15);
+      else if (type === 'toggle') navigator.vibrate(20);
+      else if (type === 'tick') navigator.vibrate(6);
+      else if (type === 'pop') navigator.vibrate(12);
+      else if (type === 'sweep') navigator.vibrate([8, 20, 8, 20]);
+    } catch (e) {}
+  }
+
   try {
     const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
     const ctx = new AudioContextClass();

@@ -103,6 +103,13 @@ export default function Home() {
   const handleVirtualClick = () => {
     setVirtualClicks((prev) => prev + 1);
     setClickScale(true);
+
+    // Haptic vibration feedback for mobile (progressive enhancement)
+    if (typeof window !== 'undefined' && typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+      try {
+        navigator.vibrate(15);
+      } catch (e) {}
+    }
     
     // Synthesize simple sine click
     if (typeof window !== 'undefined') {
