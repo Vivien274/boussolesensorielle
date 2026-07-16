@@ -62,6 +62,60 @@ const products: FidgetProduct[] = [
     price: '3.40€',
     wooCommerceUrl: 'https://spoolio.fr/produit/fidget-boule-piquante/',
     imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/12/Spoolio-fidget-sensoriel-boule-3-scaled.webp'
+  },
+  {
+    id: 'serpent-articule',
+    name: 'Serpent Articulé',
+    category: 'manipuler',
+    description: 'Un long corps sinueux entièrement articulé qui ondule et se contorsionne de façon hypnotique dans tes mains. Un incontournable pour libérer les tensions motrices.',
+    price: '4.00€',
+    wooCommerceUrl: 'https://spoolio.fr/produit/serpent-articule/',
+    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/01/Spoolio-Serpent-articule-11-scaled.jpg'
+  },
+  {
+    id: 'gadgetoids-robot-transformable',
+    name: 'Gadgetoids™ Robot Transformable',
+    category: 'resoudre',
+    description: 'Un mini robot geek transformable inspiré des objets tech rétro des années 90. Manipule ses articulations pour le métamorphoser et stimuler ton focus.',
+    price: '12.00€',
+    wooCommerceUrl: 'https://spoolio.fr/produit/gadgetoids-robot-transformable/',
+    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2026/02/Gadgetoids-detail-scaled.jpg'
+  },
+  {
+    id: 'clicker-coeur',
+    name: 'Clicker Cœur',
+    category: 'cliquer',
+    description: 'Un adorable clicker en forme de cœur imprimé en 3D. Presse-le à l\'infini pour un retour tactile "clicky" hyper satisfaisant et rassurant.',
+    price: '3.40€',
+    wooCommerceUrl: 'https://spoolio.fr/produit/clicker-coeur/',
+    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2026/01/Spoolio-St-Valentin-clicker-coeur-2.webp'
+  },
+  {
+    id: 'clicker-toilettes-bureau',
+    name: 'Clicker Toilettes de Bureau',
+    category: 'cliquer',
+    description: 'Le mini trône anti-stress par excellence ! Un clicker insolite en forme de toilettes de bureau pour décompresser avec humour pendant les heures de travail.',
+    price: '4.00€',
+    wooCommerceUrl: 'https://spoolio.fr/produit/clicker-toilettes-bureau/',
+    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/11/Spoolio_SecretSanta-Clicker-Toilette-4-scaled.webp'
+  },
+  {
+    id: 'clicker-mug-chocolat-chaud',
+    name: 'Clicker Mug Chocolat Chaud',
+    category: 'cliquer',
+    description: 'Une tasse de chocolat chaud réconfortante à cliquer sans modération ! Le fidget le plus mignon pour occuper tes doigts tout en restant au chaud.',
+    price: '4.00€',
+    wooCommerceUrl: 'https://spoolio.fr/produit/clicker-mug-chocolat-chaud/',
+    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/01/Spoolio_Clicker-mug-1.jpeg'
+  },
+  {
+    id: 'caca-fidget',
+    name: 'Caca Fidget',
+    category: 'manipuler',
+    description: 'Le fidget le plus rigolo ! Ce petit caca doté d\'une bouille amusante tourne entre tes doigts pour combiner relaxation mécanique et éclats de rire.',
+    price: '4.00€',
+    wooCommerceUrl: 'https://spoolio.fr/produit/caca-fidget/',
+    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/01/Spoolio-Caca_Fidget-6.jpg'
   }
 ];
 
@@ -338,6 +392,34 @@ export default function Home() {
                 {filteredProducts.map((product) => (
                   <FidgetCard key={product.id} product={product} />
                 ))}
+              </div>
+
+              {/* Call to action for full categories on spoolio.fr */}
+              <div className="mt-12 p-6 rounded-2xl bg-gradient-to-r from-spoolio-blue/10 to-spoolio-pink/10 border border-spoolio-dark-border/40 max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 select-none animate-fade-in">
+                <div className="text-left">
+                  <h3 className="font-bold text-white text-base">Tu en veux encore plus ?</h3>
+                  <p className="text-xs text-spoolio-text-muted mt-1">
+                    Explore nos collections thématiques complètes imprimées en 3D en France.
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <a
+                    href="https://spoolio.fr/categorie/animaux-figurines/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-900 border border-spoolio-dark-border text-xs font-bold text-white hover:border-cyan-400 hover:text-cyan-300 transition-all flex items-center gap-1.5 active:scale-95"
+                  >
+                    <span>🐉 Animaux & Figurines</span>
+                  </a>
+                  <a
+                    href="https://spoolio.fr/les-fidgets-jouets-sensoriels/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-900 border border-spoolio-dark-border text-xs font-bold text-white hover:border-spoolio-pink hover:text-spoolio-pink transition-all flex items-center gap-1.5 active:scale-95"
+                  >
+                    <span>🚀 Tous les Fidgets</span>
+                  </a>
+                </div>
               </div>
             </section>
           </div>
