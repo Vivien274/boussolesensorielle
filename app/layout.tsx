@@ -17,6 +17,21 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "La Boussole Sensorielle Spoolio | Fidgets 3D pour TDAH",
   description: "Trouve instantanément le fidget toy imprimé en 3D idéal pour tes mains selon ton besoin sensoriel immédiat. Conçu pour le TDAH et la concentration.",
+  keywords: ["fidget", "fidget toy", "TDAH", "autisme", "neurodiversité", "concentration", "stress", "impression 3D", "Spoolio", "calme"],
+  authors: [{ name: "Vivien - Spoolio" }],
+  openGraph: {
+    title: "La Boussole Sensorielle Spoolio | Fidgets 3D pour TDAH",
+    description: "Trouve instantanément le fidget toy imprimé en 3D idéal pour tes mains selon ton besoin sensoriel immédiat. Conçu pour le TDAH et la concentration.",
+    url: "https://boussole.spoolio.fr",
+    siteName: "Spoolio",
+    locale: "fr_FR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "La Boussole Sensorielle Spoolio | Fidgets 3D pour TDAH",
+    description: "Trouve instantanément le fidget toy imprimé en 3D idéal pour tes mains selon ton besoin sensoriel immédiat. Conçu pour le TDAH et la concentration.",
+  }
 };
 
 export default function RootLayout({
