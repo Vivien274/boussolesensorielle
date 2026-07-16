@@ -75,7 +75,7 @@ export default function AboutPage() {
             <h2 className="text-xl sm:text-2xl font-black text-white">Mon histoire, notre histoire</h2>
             
             <p>
-              Salut, moi c'est **Vivien**, le créateur de Spoolio. Étant moi-même **TDAH (Trouble du Déficit de l'Attention avec Hyperactivité)**, j'ai passé ma vie à faire gigoter mes jambes, à faire tourner mes stylos et à tripoter tout ce qui me tombait sous la main pour réussir à me concentrer.
+              Salut, moi c'est <strong className="font-bold text-white">Vivien</strong>, le créateur de Spoolio. Étant moi-même <strong className="font-bold text-white">TDAH (Trouble du Déficit de l'Attention avec Hyperactivité)</strong>, j'ai passé ma vie à faire gigoter mes jambes, à faire tourner mes stylos et à tripoter tout ce qui me tombait sous la main pour réussir à me concentrer.
             </p>
             
             <p>
