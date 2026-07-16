@@ -115,7 +115,7 @@ export default function AboutPage() {
             </div>
 
             <div className="border-t border-spoolio-dark-border/40 pt-4 space-y-1">
-              <span className="text-3xl font-black text-spoolio-yellow font-mono block">DOZENS</span>
+              <span className="text-3xl font-black text-spoolio-yellow font-mono block">DOUZAINES</span>
               <span className="text-xs font-bold text-white uppercase block">Heures de Recherche</span>
               <p className="text-[11px] text-spoolio-text-muted mt-0.5 leading-snug">
                 De tests pour affiner les clics, le glissement et le poids de chaque engrenage.
