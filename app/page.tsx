@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Compass, Sparkles, Zap, LayoutGrid, Gamepad2, Wind, Heart } from 'lucide-react';
+import { Compass, Sparkles, Zap, LayoutGrid, Gamepad2, Wind, Heart, Brain } from 'lucide-react';
 import { track } from '@vercel/analytics';
 import SensoryFilter from '../components/SensoryFilter';
 import FidgetCard from '../components/FidgetCard';
 import DigitalFidgets from '../components/DigitalFidgets';
 import BreathingGuide from '../components/BreathingGuide';
+import FidgetProfiler from '../components/FidgetProfiler';
 import { FidgetProduct, SensoryCategory } from '../types';
 
 const products: FidgetProduct[] = [
@@ -18,7 +19,10 @@ const products: FidgetProduct[] = [
     description: 'Le clic-clic franc et ultra tactile d\'un véritable switch mécanique de clavier de jeu. La référence ultime pour calmer le besoin de presser.',
     price: '2.55€',
     wooCommerceUrl: 'https://spoolio.fr/produit/porte-cle-clavier-mecanique/',
-    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/01/Spoolio_Porte-Cle-clavier-mecanique-7.jpg'
+    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/01/Spoolio_Porte-Cle-clavier-mecanique-7.jpg',
+    noiseLevel: 'high',
+    size: 'pocket',
+    profiles: ['tdah', 'focus']
   },
   {
     id: 'fidget-twist',
@@ -27,7 +31,10 @@ const products: FidgetProduct[] = [
     description: 'Un mouvement hélicoïdal fascinant : fais monter et descendre la bague le long de sa spirale 3D. Idéal pour concentrer l\'attention et les yeux.',
     price: '3.00€',
     wooCommerceUrl: 'https://spoolio.fr/produit/fidget-twist/',
-    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/12/Spoolio-fidget-twist-2-scaled.webp'
+    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/12/Spoolio-fidget-twist-2-scaled.webp',
+    noiseLevel: 'silent',
+    size: 'medium',
+    profiles: ['anxiety', 'autism']
   },
   {
     id: 'fidget-cube-articule',
@@ -36,7 +43,10 @@ const products: FidgetProduct[] = [
     description: 'Plie, tourne et replie ce cube infini. Totalement silencieux, il s\'occupe de tes doigts pendant les réunions ou les cours sans faire de bruit.',
     price: '4.00€',
     wooCommerceUrl: 'https://spoolio.fr/produit/fidget-cube-articule/',
-    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/12/Spoolio-fidget-cubes-2-scaled.webp'
+    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/12/Spoolio-fidget-cubes-2-scaled.webp',
+    noiseLevel: 'low',
+    size: 'medium',
+    profiles: ['tdah', 'focus', 'autism']
   },
   {
     id: 'fidget-bague-rotative',
@@ -45,7 +55,10 @@ const products: FidgetProduct[] = [
     description: 'Porte-la au doigt et fais-la tourner discrètement à l\'infini. Le fidget le plus discret pour évacuer le stress n\'importe où.',
     price: '3.00€',
     wooCommerceUrl: 'https://spoolio.fr/produit/fidget-bague-rotative/',
-    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/12/Spoolio-fidget-bague-rotative-5-scaled.webp'
+    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/12/Spoolio-fidget-bague-rotative-5-scaled.webp',
+    noiseLevel: 'silent',
+    size: 'pocket',
+    profiles: ['anxiety', 'tdah']
   },
   {
     id: 'fidget-engrenages-mecanique',
@@ -54,7 +67,10 @@ const products: FidgetProduct[] = [
     description: 'Le plaisir brut d\'engrenages imbriqués à manipuler. Fais tourner les engrenages pour ressentir le retour mécanique et canaliser ton attention.',
     price: '4.00€',
     wooCommerceUrl: 'https://spoolio.fr/produit/fidget-engrenages-mecanique/',
-    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/12/Spoolio-fidget-mecanique-engrenage-2-scaled.webp'
+    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/12/Spoolio-fidget-mecanique-engrenage-2-scaled.webp',
+    noiseLevel: 'low',
+    size: 'medium',
+    profiles: ['focus', 'tdah']
   },
   {
     id: 'fidget-boule-piquante',
@@ -63,7 +79,10 @@ const products: FidgetProduct[] = [
     description: 'Des dizaines de petits pics d\'acupression stimulants. Masse, roule et fais glisser tes doigts sur ses reliefs pour relâcher instantanément les tensions.',
     price: '3.40€',
     wooCommerceUrl: 'https://spoolio.fr/produit/fidget-boule-piquante/',
-    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/12/Spoolio-fidget-sensoriel-boule-3-scaled.webp'
+    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/12/Spoolio-fidget-sensoriel-boule-3-scaled.webp',
+    noiseLevel: 'silent',
+    size: 'pocket',
+    profiles: ['anxiety', 'autism']
   },
   {
     id: 'serpent-articule',
@@ -72,7 +91,10 @@ const products: FidgetProduct[] = [
     description: 'Un long corps sinueux entièrement articulé qui ondule et se contorsionne de façon hypnotique dans tes mains. Un incontournable pour libérer les tensions motrices.',
     price: '4.00€',
     wooCommerceUrl: 'https://spoolio.fr/produit/serpent-articule/',
-    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/01/Spoolio-Serpent-articule-11-scaled.jpg'
+    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/01/Spoolio-Serpent-articule-11-scaled.jpg',
+    noiseLevel: 'low',
+    size: 'large',
+    profiles: ['tdah', 'autism']
   },
   {
     id: 'gadgetoids-robot-transformable',
@@ -81,7 +103,10 @@ const products: FidgetProduct[] = [
     description: 'Un mini robot geek transformable inspiré des objets tech rétro des années 90. Manipule ses articulations pour le métamorphoser et stimuler ton focus.',
     price: '12.00€',
     wooCommerceUrl: 'https://spoolio.fr/produit/gadgetoids-robot-transformable/',
-    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2026/02/Gadgetoids-detail-scaled.jpg'
+    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2026/02/Gadgetoids-detail-scaled.jpg',
+    noiseLevel: 'low',
+    size: 'medium',
+    profiles: ['focus', 'tdah']
   },
   {
     id: 'clicker-coeur',
@@ -90,7 +115,10 @@ const products: FidgetProduct[] = [
     description: 'Un adorable clicker en forme de cœur imprimé en 3D. Presse-le à l\'infini pour un retour tactile "clicky" hyper satisfaisant et rassurant.',
     price: '3.40€',
     wooCommerceUrl: 'https://spoolio.fr/produit/clicker-coeur/',
-    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2026/01/Spoolio-St-Valentin-clicker-coeur-2.webp'
+    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2026/01/Spoolio-St-Valentin-clicker-coeur-2.webp',
+    noiseLevel: 'medium',
+    size: 'pocket',
+    profiles: ['anxiety', 'focus']
   },
   {
     id: 'clicker-toilettes-bureau',
@@ -99,7 +127,10 @@ const products: FidgetProduct[] = [
     description: 'Le mini trône anti-stress par excellence ! Un clicker insolite en forme de toilettes de bureau pour décompresser avec humour pendant les heures de travail.',
     price: '4.00€',
     wooCommerceUrl: 'https://spoolio.fr/produit/clicker-toilettes-bureau/',
-    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/11/Spoolio_SecretSanta-Clicker-Toilette-4-scaled.webp'
+    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/11/Spoolio_SecretSanta-Clicker-Toilette-4-scaled.webp',
+    noiseLevel: 'medium',
+    size: 'pocket',
+    profiles: ['focus', 'tdah']
   },
   {
     id: 'clicker-mug-chocolat-chaud',
@@ -108,7 +139,10 @@ const products: FidgetProduct[] = [
     description: 'Une tasse de chocolat chaud réconfortante à cliquer sans modération ! Le fidget le plus mignon pour occuper tes doigts tout en restant au chaud.',
     price: '4.00€',
     wooCommerceUrl: 'https://spoolio.fr/produit/clicker-mug-chocolat-chaud/',
-    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/01/Spoolio_Clicker-mug-1.jpeg'
+    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/01/Spoolio_Clicker-mug-1.jpeg',
+    noiseLevel: 'medium',
+    size: 'pocket',
+    profiles: ['anxiety', 'autism']
   },
   {
     id: 'caca-fidget',
@@ -117,7 +151,10 @@ const products: FidgetProduct[] = [
     description: 'Le fidget le plus rigolo ! Ce petit caca doté d\'une bouille amusante tourne entre tes doigts pour combiner relaxation mécanique et éclats de rire.',
     price: '4.00€',
     wooCommerceUrl: 'https://spoolio.fr/produit/caca-fidget/',
-    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/01/Spoolio-Caca_Fidget-6.jpg'
+    imageUrl: 'https://i0.wp.com/spoolio.fr/wp-content/uploads/2025/01/Spoolio-Caca_Fidget-6.jpg',
+    noiseLevel: 'silent',
+    size: 'pocket',
+    profiles: ['tdah', 'focus']
   }
 ];
 
@@ -128,7 +165,7 @@ const categoryHeadings = {
   caresser: '🌿 Un retour tactile doux et apaisant :',
 };
 
-type AppTab = 'compass' | 'digital' | 'breathing';
+type AppTab = 'compass' | 'profiler' | 'digital' | 'breathing';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<AppTab>('compass');
@@ -342,6 +379,21 @@ export default function Home() {
             >
               <LayoutGrid className="w-4 h-4" />
               <span>🧭 Trouver mon Fidget</span>
+             </button>
+            <button
+              onClick={() => handleTabSwitch('profiler')}
+              className={`
+                flex items-center gap-2 py-3.5 px-6 rounded-2xl font-bold text-xs sm:text-sm tracking-wider uppercase
+                transition-all duration-300 cursor-pointer
+                ${
+                  activeTab === 'profiler'
+                    ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/20'
+                    : 'text-spoolio-text-muted hover:text-white'
+                }
+              `}
+            >
+              <Brain className="w-4 h-4" />
+              <span>🎯 Diagnostic</span>
             </button>
             <button
               onClick={() => handleTabSwitch('digital')}
@@ -439,6 +491,12 @@ export default function Home() {
               </div>
             </section>
           </div>
+        )}
+
+        {activeTab === 'profiler' && (
+          <section className="animate-fade-in">
+            <FidgetProfiler products={products} />
+          </section>
         )}
 
         {activeTab === 'digital' && (
