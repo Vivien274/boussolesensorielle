@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Compass, Sparkles, Zap, LayoutGrid, Gamepad2, Wind, Heart } from 'lucide-react';
 import SensoryFilter from '../components/SensoryFilter';
 import FidgetCard from '../components/FidgetCard';
@@ -267,6 +268,12 @@ export default function Home() {
 
         {/* Quick actions: Virtual clicker switch */}
         <div className="flex items-center gap-3">
+          <Link
+            href="/a-propos"
+            className="text-xs font-black tracking-wider uppercase px-4 py-2.5 rounded-2xl border border-spoolio-dark-border bg-spoolio-dark-card/30 hover:border-spoolio-blue hover:text-spoolio-blue transition-all cursor-pointer text-spoolio-text-muted hover:bg-slate-900/30 flex items-center gap-1.5 active:scale-95"
+          >
+            <span>💡 Notre Démarche</span>
+          </Link>
           <button
             onClick={handleVirtualClick}
             className={`
@@ -487,6 +494,12 @@ export default function Home() {
           &copy; {new Date().getFullYear()} Spoolio. Conçu avec attention pour les cerveaux TDAH & neuroatypiques.
         </p>
         <div className="flex items-center gap-6">
+          <Link
+            href="/a-propos"
+            className="text-xs text-spoolio-text-muted hover:text-spoolio-pink hover:underline transition-colors"
+          >
+            À propos & Démarche
+          </Link>
           <a
             href="https://spoolio.fr"
             target="_blank"
