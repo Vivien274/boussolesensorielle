@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, RotateCcw, Sliders, ToggleLeft, ToggleRight, Sparkles, CircleDot, Maximize2, X } from 'lucide-react';
+import { track } from '@vercel/analytics';
 
 type FidgetSubTab = 'switchboard' | 'bubblewrap' | 'particles' | 'elastic';
 
@@ -614,6 +615,9 @@ export default function DigitalFidgets() {
   }, [activeTab]);
 
   const handleTabTransition = (tab: FidgetSubTab) => {
+    try {
+      track('fidget_tab_visit', { tab });
+    } catch (e) {}
     if (typeof document !== 'undefined' && 'startViewTransition' in document) {
       (document as any).startViewTransition(() => {
         setActiveTab(tab);

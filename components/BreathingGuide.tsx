@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, Volume2, VolumeX, RotateCcw, Sparkles } from 'lucide-react';
+import { track } from '@vercel/analytics';
 
 type BreathPhase = 'inhale' | 'hold-in' | 'exhale' | 'hold-out';
 
@@ -204,6 +205,9 @@ export default function BreathingGuide() {
 
   const handleStartStop = () => {
     if (!isActive) {
+      try {
+        track('breath_session_start', { duration: breathDuration });
+      } catch (e) {}
       initAudio();
       setIsActive(true);
     } else {

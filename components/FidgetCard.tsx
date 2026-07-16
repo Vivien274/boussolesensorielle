@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { ShoppingCart, Keyboard, Infinity as InfinityIcon, Puzzle, Waves, ExternalLink } from 'lucide-react';
+import { track } from '@vercel/analytics';
 import { FidgetProduct } from '../types';
 
 interface FidgetCardProps {
@@ -88,6 +89,16 @@ export default function FidgetCard({ product }: FidgetCardProps) {
             href={product.wooCommerceUrl}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => {
+              try {
+                track('product_checkout_click', {
+                  productId: product.id,
+                  productName: product.name,
+                  category: product.category,
+                  price: product.price
+                });
+              } catch (e) {}
+            }}
             className="
               relative flex items-center justify-center gap-2.5 w-full py-4 px-6 rounded-2xl
               font-bold text-sm tracking-wider uppercase transition-all duration-300 select-none

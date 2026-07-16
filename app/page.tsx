@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Compass, Sparkles, Zap, LayoutGrid, Gamepad2, Wind, Heart } from 'lucide-react';
+import { track } from '@vercel/analytics';
 import SensoryFilter from '../components/SensoryFilter';
 import FidgetCard from '../components/FidgetCard';
 import DigitalFidgets from '../components/DigitalFidgets';
@@ -171,6 +172,11 @@ export default function Home() {
   }, []);
 
   const handleSelectCategory = (category: SensoryCategory | null) => {
+    if (category) {
+      try {
+        track('sensory_filter_select', { category });
+      } catch (e) {}
+    }
     if (typeof document !== 'undefined' && 'startViewTransition' in document) {
       (document as any).startViewTransition(() => {
         setSelectedCategory(category);
@@ -181,6 +187,9 @@ export default function Home() {
   };
 
   const handleTabSwitch = (tab: AppTab) => {
+    try {
+      track('main_tab_switch', { tab });
+    } catch (e) {}
     if (typeof document !== 'undefined' && 'startViewTransition' in document) {
       (document as any).startViewTransition(() => {
         setActiveTab(tab);
