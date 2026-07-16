@@ -1004,7 +1004,7 @@ export default function DigitalFidgets() {
     <div className="w-full max-w-4xl mx-auto px-4 relative">
       
       {/* Sub tabs selector */}
-      <div className="flex max-w-lg mx-auto mb-8 bg-spoolio-dark-card/45 p-1 rounded-2xl select-none border border-spoolio-dark-border/20">
+      <div className="flex max-w-2xl mx-auto mb-8 bg-spoolio-dark-card/45 p-1 rounded-2xl select-none border border-spoolio-dark-border/20">
         <button
           onClick={() => handleTabTransition('switchboard')}
           className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm tracking-wider uppercase transition-all duration-200 cursor-pointer outline-none ${

@@ -277,7 +277,7 @@ export default function Home() {
           <button
             onClick={handleVirtualClick}
             className={`
-              flex items-center gap-2 px-4 py-2 rounded-2xl border border-spoolio-dark-border bg-spoolio-dark-card/60
+              hidden md:flex items-center gap-2 px-4 py-2 rounded-2xl border border-spoolio-dark-border bg-spoolio-dark-card/60
               hover:border-spoolio-pink hover:text-spoolio-pink transition-all duration-100 cursor-pointer
               active:scale-95 outline-hidden focus-visible:ring-2 focus-visible:ring-spoolio-pink
               ${clickScale ? 'scale-90 bg-spoolio-pink/20 text-spoolio-pink border-spoolio-pink' : ''}

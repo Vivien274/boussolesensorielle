@@ -112,13 +112,7 @@ export default function SensoryFilter({
                 </p>
               </div>
 
-              {/* Sensory Indicator Light (Active dot) */}
-              <div
-                className={`
-                  absolute -bottom-1 left-1/2 -translate-x-1/2 w-8 h-1 rounded-full transition-all duration-300
-                  ${isActive ? 'bg-current opacity-100 scale-x-100' : 'bg-transparent opacity-0 scale-x-50 group-hover:bg-spoolio-dark-border group-hover:opacity-50'}
-                `}
-              />
+
             </button>
           );
         })}
