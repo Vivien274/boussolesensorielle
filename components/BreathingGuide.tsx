@@ -149,45 +149,42 @@ export default function BreathingGuide() {
 
     initAudio();
 
-    const interval = setInterval(() => {
-      setSecondsRemaining(prev => {
-        const nextSec = prev - 1;
-        
-        // Accumulate breathing statistics
-        incrementCalmStat('breathingSeconds', 1);
+    const timer = setTimeout(() => {
+      // Calculate progress ratio for sound morphing
+      const nextSec = secondsRemaining - 1;
+      const totalDuration = breathDuration;
+      const elapsed = totalDuration - nextSec;
+      const progressRatio = Math.max(0, Math.min(1, elapsed / totalDuration));
+      updateAudioNode(phase, progressRatio);
 
-        // Calculate progress ratio for sound morphing
-        const totalDuration = breathDuration;
-        const elapsed = totalDuration - nextSec;
-        const progressRatio = Math.max(0, Math.min(1, elapsed / totalDuration));
-        updateAudioNode(phase, progressRatio);
+      // Accumulate breathing statistics (safely inside effect body)
+      incrementCalmStat('breathingSeconds', 1);
 
-        if (nextSec <= 0) {
-          // Transition to the next phase in Box Breathing
-          let nextPhase: BreathPhase = 'inhale';
-          if (phase === 'inhale') {
-            nextPhase = 'hold-in';
-          } else if (phase === 'hold-in') {
-            nextPhase = 'exhale';
-          } else if (phase === 'exhale') {
-            nextPhase = 'hold-out';
-          } else if (phase === 'hold-out') {
-            nextPhase = 'inhale';
-            setCycles(c => c + 1);
-          }
-
-          setPhase(nextPhase);
-          return breathDuration;
+      if (nextSec <= 0) {
+        // Transition to the next phase in Box Breathing
+        let nextPhase: BreathPhase = 'inhale';
+        if (phase === 'inhale') {
+          nextPhase = 'hold-in';
+        } else if (phase === 'hold-in') {
+          nextPhase = 'exhale';
+        } else if (phase === 'exhale') {
+          nextPhase = 'hold-out';
+        } else if (phase === 'hold-out') {
+          nextPhase = 'inhale';
+          setCycles(c => c + 1);
         }
 
-        return nextSec;
-      });
+        setPhase(nextPhase);
+        setSecondsRemaining(breathDuration);
+      } else {
+        setSecondsRemaining(nextSec);
+      }
     }, 1000);
 
     return () => {
-      clearInterval(interval);
+      clearTimeout(timer);
     };
-  }, [isActive, phase, breathDuration]);
+  }, [isActive, phase, secondsRemaining, breathDuration]);
 
   // Cleanup audio nodes on unmount
   useEffect(() => {
