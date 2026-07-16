@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Compass, Sparkles, Zap, LayoutGrid, Gamepad2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Compass, Sparkles, Zap, LayoutGrid, Gamepad2, Wind, Heart } from 'lucide-react';
 import SensoryFilter from '../components/SensoryFilter';
 import FidgetCard from '../components/FidgetCard';
 import DigitalFidgets from '../components/DigitalFidgets';
+import BreathingGuide from '../components/BreathingGuide';
 import { FidgetProduct, SensoryCategory } from '../types';
 
 const products: FidgetProduct[] = [
@@ -71,13 +72,48 @@ const categoryHeadings = {
   caresser: '🌿 Un retour tactile doux et apaisant :',
 };
 
-type AppTab = 'compass' | 'digital';
+type AppTab = 'compass' | 'digital' | 'breathing';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<AppTab>('compass');
   const [selectedCategory, setSelectedCategory] = useState<SensoryCategory | null>(null);
   const [virtualClicks, setVirtualClicks] = useState<number>(0);
   const [clickScale, setClickScale] = useState<boolean>(false);
+
+  // Statistics tracker state
+  const [stats, setStats] = useState({
+    clicks: 0,
+    pops: 0,
+    twangs: 0,
+    breathingSeconds: 0
+  });
+
+  // Load stats from localStorage on mount and register update listener
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('spoolio_calm_stats');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          setStats(parsed);
+          setVirtualClicks(parsed.clicks || 0);
+        }
+      } catch (e) {}
+
+      const handleStatsUpdate = (e: Event) => {
+        const customEvent = e as CustomEvent;
+        if (customEvent.detail) {
+          setStats(customEvent.detail);
+          setVirtualClicks(customEvent.detail.clicks || 0);
+        }
+      };
+
+      window.addEventListener('calm-stats-updated', handleStatsUpdate);
+      return () => {
+        window.removeEventListener('calm-stats-updated', handleStatsUpdate);
+      };
+    }
+  }, []);
 
   const handleSelectCategory = (category: SensoryCategory | null) => {
     if (typeof document !== 'undefined' && 'startViewTransition' in document) {
@@ -108,6 +144,17 @@ export default function Home() {
     if (typeof window !== 'undefined' && typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
       try {
         navigator.vibrate(15);
+      } catch (e) {}
+    }
+
+    // Save clicks to statistics
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('spoolio_calm_stats');
+        const currentStats = saved ? JSON.parse(saved) : { clicks: 0, pops: 0, twangs: 0, breathingSeconds: 0 };
+        currentStats.clicks = (currentStats.clicks || 0) + 1;
+        localStorage.setItem('spoolio_calm_stats', JSON.stringify(currentStats));
+        window.dispatchEvent(new CustomEvent('calm-stats-updated', { detail: currentStats }));
       } catch (e) {}
     }
     
@@ -210,7 +257,7 @@ export default function Home() {
 
         {/* Navigation Switcher Tabs */}
         <div className="flex justify-center mb-12 select-none">
-          <div className="inline-flex p-1.5 bg-spoolio-dark-card border border-spoolio-dark-border/60 rounded-3xl">
+          <div className="inline-flex p-1.5 bg-spoolio-dark-card border border-spoolio-dark-border/60 rounded-3xl flex-wrap justify-center gap-1 sm:gap-0">
             <button
               onClick={() => handleTabSwitch('compass')}
               className={`
@@ -241,11 +288,26 @@ export default function Home() {
               <Gamepad2 className="w-4 h-4" />
               <span>🕹️ Fidgets Numériques</span>
             </button>
+            <button
+              onClick={() => handleTabSwitch('breathing')}
+              className={`
+                flex items-center gap-2 py-3.5 px-6 rounded-2xl font-bold text-xs sm:text-sm tracking-wider uppercase
+                transition-all duration-300 cursor-pointer
+                ${
+                  activeTab === 'breathing'
+                    ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/20'
+                    : 'text-spoolio-text-muted hover:text-white'
+                }
+              `}
+            >
+              <Wind className="w-4 h-4" />
+              <span>🫁 Respiration Zen</span>
+            </button>
           </div>
         </div>
 
         {/* Conditional rendering based on Active Tab */}
-        {activeTab === 'compass' ? (
+        {activeTab === 'compass' && (
           <div className="space-y-16 md:space-y-20 animate-fade-in">
             {/* 4 Pillars Sensory Filter */}
             <section>
@@ -279,12 +341,62 @@ export default function Home() {
               </div>
             </section>
           </div>
-        ) : (
-          /* Render the newly added Digital Fidgets Play zone */
+        )}
+
+        {activeTab === 'digital' && (
           <section className="animate-fade-in">
             <DigitalFidgets />
           </section>
         )}
+
+        {activeTab === 'breathing' && (
+          <section className="animate-fade-in">
+            <BreathingGuide />
+          </section>
+        )}
+
+        {/* Mon Havre de Paix - Calm Stats Dashboard */}
+        <section className="mt-20 border-t border-spoolio-dark-border/40 pt-12 max-w-4xl mx-auto w-full select-none text-center">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-spoolio-pink/30 bg-spoolio-pink/10 text-xs font-semibold text-spoolio-pink mb-4">
+            <Heart className="w-3.5 h-3.5 fill-current animate-pulse" />
+            <span>Mon Havre de Paix</span>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-black text-white tracking-wide">Ton Énergie Apaisée</h2>
+          <p className="text-xs sm:text-sm text-spoolio-text-muted mt-1 max-w-md mx-auto">
+            Chaque micro-pause et chaque respiration compte. Découvre l'énergie anti-stress que tu as libérée :
+          </p>
+
+          {/* Stats grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+            <div className="bg-spoolio-dark-card border border-spoolio-dark-border/60 p-5 rounded-2xl">
+              <span className="text-2xl font-black text-white font-mono block">{stats.clicks}</span>
+              <span className="text-[10px] font-bold text-spoolio-text-muted uppercase tracking-widest mt-1 block">Pressions / Clics</span>
+            </div>
+            <div className="bg-spoolio-dark-card border border-spoolio-dark-border/60 p-5 rounded-2xl">
+              <span className="text-2xl font-black text-white font-mono block">{stats.pops}</span>
+              <span className="text-[10px] font-bold text-spoolio-text-muted uppercase tracking-widest mt-1 block">Bulles Éclatées</span>
+            </div>
+            <div className="bg-spoolio-dark-card border border-spoolio-dark-border/60 p-5 rounded-2xl">
+              <span className="text-2xl font-black text-white font-mono block">{stats.twangs}</span>
+              <span className="text-[10px] font-bold text-spoolio-text-muted uppercase tracking-widest mt-1 block">Vibrations Élastiques</span>
+            </div>
+            <div className="bg-spoolio-dark-card border border-spoolio-dark-border/60 p-5 rounded-2xl">
+              <span className="text-2xl font-black text-white font-mono block">
+                {Math.floor(stats.breathingSeconds / 60)}m {stats.breathingSeconds % 60}s
+              </span>
+              <span className="text-[10px] font-bold text-spoolio-text-muted uppercase tracking-widest mt-1 block">Respiration Zen</span>
+            </div>
+          </div>
+
+          {/* Motivational ADHD Affirmation */}
+          <div className="mt-8 text-xs font-semibold italic text-spoolio-text-muted/80 bg-slate-900/40 py-3 px-6 rounded-xl inline-block max-w-lg">
+            {stats.breathingSeconds > 0 || stats.clicks > 0 || stats.pops > 0 || stats.twangs > 0 ? (
+              <span>✨ "Tu as pris un vrai moment pour te recentrer aujourd'hui. Ton cerveau te remercie."</span>
+            ) : (
+              <span>✨ "Explore les fidgets et prends de grandes inspirations pour commencer à apaiser ton esprit."</span>
+            )}
+          </div>
+        </section>
       </main>
 
       {/* Footer */}

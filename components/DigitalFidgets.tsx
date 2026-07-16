@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, RotateCcw, Sliders, ToggleLeft, ToggleRight, Sparkles, CircleDot, Maximize2, X } from 'lucide-react';
 
-type FidgetSubTab = 'switchboard' | 'bubblewrap' | 'particles';
+type FidgetSubTab = 'switchboard' | 'bubblewrap' | 'particles' | 'elastic';
 
 // Synthesize satisfying sounds using the Web Audio API (No large file downloads!)
 const playSound = (type: 'click' | 'toggle' | 'tick' | 'pop' | 'sweep') => {
@@ -80,6 +80,17 @@ const playSound = (type: 'click' | 'toggle' | 'tick' | 'pop' | 'sweep') => {
   }
 };
 
+const incrementCalmStat = (type: 'clicks' | 'pops' | 'twangs' | 'breathingSeconds', amount: number = 1) => {
+  if (typeof window === 'undefined') return;
+  try {
+    const saved = localStorage.getItem('spoolio_calm_stats');
+    const stats = saved ? JSON.parse(saved) : { clicks: 0, pops: 0, twangs: 0, breathingSeconds: 0 };
+    stats[type] = (stats[type] || 0) + amount;
+    localStorage.setItem('spoolio_calm_stats', JSON.stringify(stats));
+    window.dispatchEvent(new CustomEvent('calm-stats-updated', { detail: stats }));
+  } catch (e) {}
+};
+
 export default function DigitalFidgets() {
   const [activeTab, setActiveTab] = useState<FidgetSubTab>('switchboard');
   const [fullscreenControl, setFullscreenControl] = useState<'keyboard' | 'levers' | 'slider' | 'dial' | null>(null);
@@ -102,10 +113,14 @@ export default function DigitalFidgets() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [particleCount, setParticleCount] = useState(200);
 
+  // Fidget 4: Elastic Canvas setup
+  const elasticCanvasRef = useRef<HTMLCanvasElement | null>(null);
+
   // Handle Switchboard Click Button
   const handleBtnClick = () => {
     setBtnClicks(prev => prev + 1);
     playSound('click');
+    incrementCalmStat('clicks');
   };
 
   // Handle Toggle Switch
@@ -113,6 +128,7 @@ export default function DigitalFidgets() {
     if (which === 1) setToggle1(prev => !prev);
     else setToggle2(prev => !prev);
     playSound('toggle');
+    incrementCalmStat('clicks');
   };
 
   // Handle Slider notch feedback (ticks every 5 units)
@@ -122,6 +138,7 @@ export default function DigitalFidgets() {
     if (Math.abs(val - lastSliderTickRef.current) >= 5) {
       playSound('tick');
       lastSliderTickRef.current = val;
+      incrementCalmStat('clicks');
     }
   };
 
@@ -129,6 +146,7 @@ export default function DigitalFidgets() {
   const handleDialClick = () => {
     setDialAngle(prev => (prev + 30) % 360);
     playSound('tick');
+    incrementCalmStat('clicks');
   };
 
   // Handle Popping Bubbles
@@ -139,6 +157,7 @@ export default function DigitalFidgets() {
     setBubbles(newBubbles);
     setPopCount(prev => prev + 1);
     playSound('pop');
+    incrementCalmStat('pops');
   };
 
   // Reset/Regrow all bubbles with a sweet rapid sequence
@@ -376,6 +395,223 @@ export default function DigitalFidgets() {
       }
     };
   }, [activeTab, particleCount, isColorblind]);
+
+  // Fidget 4: Tactile elastic string simulation
+  useEffect(() => {
+    if (activeTab !== 'elastic' || !elasticCanvasRef.current) return;
+
+    const canvas = elasticCanvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationId: number;
+    let width = canvas.width = 600;
+    let height = canvas.height = 350;
+
+    const resizeHandler = () => {
+      const parent = canvas.parentElement;
+      if (parent) {
+        width = canvas.width = parent.clientWidth;
+        height = canvas.height = 350;
+      }
+    };
+    resizeHandler();
+    window.addEventListener('resize', resizeHandler);
+
+    // Physics parameters
+    const yBase = height / 2; // Default horizontal line
+    let dragY = yBase;
+    let dragX = width / 2;
+    let isDragging = false;
+
+    // Simulation variables
+    let yPos = yBase; // current vertical position of the center
+    let yVel = 0; // velocity of the center
+    const k = 0.08; // spring constant
+    const damping = 0.88; // decay damping factor
+
+    // Track mouse coordinates
+    const getCoordinates = (e: MouseEvent | TouchEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      if ('touches' in e) {
+        if (e.touches.length === 0) return null;
+        return {
+          x: e.touches[0].clientX - rect.left,
+          y: e.touches[0].clientY - rect.top,
+        };
+      } else {
+        return {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+        };
+      }
+    };
+
+    const handleStart = (e: MouseEvent | TouchEvent) => {
+      const coords = getCoordinates(e);
+      if (coords) {
+        // Only lock if dragging close to the string center vertically
+        const distY = Math.abs(coords.y - yPos);
+        if (distY < 60) {
+          isDragging = true;
+          dragX = coords.x;
+          dragY = coords.y;
+        }
+      }
+    };
+
+    const handleMove = (e: MouseEvent | TouchEvent) => {
+      if (!isDragging) return;
+      const coords = getCoordinates(e);
+      if (coords) {
+        dragX = coords.x;
+        // Limit stretch vertical range
+        dragY = Math.max(50, Math.min(height - 50, coords.y));
+        yPos = dragY;
+        yVel = 0; // reset velocity when dragged
+      }
+    };
+
+    const handleEnd = () => {
+      if (isDragging) {
+        isDragging = false;
+        
+        // Trigger spring sound and haptic vibration pattern!
+        const displacement = Math.abs(yPos - yBase);
+        if (displacement > 10) {
+          // Play twang sound
+          playSpringSound(displacement);
+          // Vibrate device
+          if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+            try {
+              // Pulsed vibration decaying based on displacement
+              const pulse = Math.min(50, Math.floor(displacement / 3));
+              navigator.vibrate([pulse, 40, Math.floor(pulse / 2), 30, Math.floor(pulse / 4)]);
+            } catch (err) {}
+          }
+          // Increment stat
+          incrementCalmStat('twangs');
+        }
+      }
+    };
+
+    // Synthesize spring twang audio
+    const playSpringSound = (intensity: number) => {
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        const audioCtx = new AudioContextClass();
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        // Twang sound frequency drops and oscillates
+        const baseFreq = 70 + Math.min(100, intensity / 2);
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
+        osc.frequency.linearRampToValueAtTime(baseFreq * 1.5, audioCtx.currentTime + 0.05);
+        osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.35);
+
+        const volume = Math.min(0.4, intensity / 250);
+        gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.35);
+      } catch (err) {}
+    };
+
+    const draw = () => {
+      ctx.fillStyle = '#06070a'; // Dark solid background
+      ctx.fillRect(0, 0, width, height);
+
+      // Draw subtle grid helper for visual depth
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
+      ctx.lineWidth = 1;
+      const step = 30;
+      for (let x = 0; x < width; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < height; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+
+      // Physics update if not dragged
+      if (!isDragging) {
+        const displacement = yPos - yBase;
+        const force = -k * displacement;
+        yVel += force;
+        yVel *= damping; // damping factor
+        yPos += yVel;
+      }
+
+      // Render Elastic String
+      ctx.beginPath();
+      ctx.moveTo(0, yBase);
+      const ctrlX = isDragging ? dragX : width / 2;
+      ctx.quadraticCurveTo(ctrlX, yPos, width, yBase);
+      
+      // Neon glow stroke
+      ctx.strokeStyle = '#00f5ff';
+      ctx.lineWidth = 6;
+      ctx.lineCap = 'round';
+      ctx.shadowColor = '#00f5ff';
+      ctx.shadowBlur = 15;
+      ctx.stroke();
+      ctx.shadowBlur = 0; // reset shadow for other draws
+
+      // Draw active handle center circle
+      ctx.beginPath();
+      const circleX = isDragging ? dragX : width / 2;
+      ctx.arc(circleX, yPos, 10, 0, Math.PI * 2);
+      ctx.fillStyle = isDragging ? '#ffe600' : '#ffffff';
+      ctx.strokeStyle = '#06070a';
+      ctx.lineWidth = 3;
+      ctx.fill();
+      ctx.stroke();
+
+      // Draw static anchors at the sides
+      ctx.beginPath();
+      ctx.arc(0, yBase, 7, 0, Math.PI * 2);
+      ctx.arc(width, yBase, 7, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.fill();
+
+      animationId = requestAnimationFrame(draw);
+    };
+
+    draw();
+
+    // Attach listeners
+    canvas.addEventListener('mousedown', handleStart);
+    canvas.addEventListener('mousemove', handleMove);
+    canvas.addEventListener('mouseup', handleEnd);
+    canvas.addEventListener('mouseleave', handleEnd);
+
+    canvas.addEventListener('touchstart', handleStart, { passive: true });
+    canvas.addEventListener('touchmove', handleMove, { passive: true });
+    canvas.addEventListener('touchend', handleEnd, { passive: true });
+
+    return () => {
+      cancelAnimationFrame(animationId);
+      window.removeEventListener('resize', resizeHandler);
+      if (canvas) {
+        canvas.removeEventListener('mousedown', handleStart);
+        canvas.removeEventListener('mousemove', handleMove);
+        canvas.removeEventListener('mouseup', handleEnd);
+        canvas.removeEventListener('mouseleave', handleEnd);
+        canvas.removeEventListener('touchstart', handleStart);
+        canvas.removeEventListener('touchmove', handleMove);
+        canvas.removeEventListener('touchend', handleEnd);
+      }
+    };
+  }, [activeTab]);
 
   const handleTabTransition = (tab: FidgetSubTab) => {
     if (typeof document !== 'undefined' && 'startViewTransition' in document) {
@@ -736,6 +972,33 @@ export default function DigitalFidgets() {
     );
   }
 
+  // Modular render function: Elastic
+  const renderElastic = () => (
+    <div className="bg-spoolio-dark-card border border-spoolio-dark-border p-6 rounded-3xl max-w-2xl mx-auto animate-fade-in w-full shadow-lg">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-spoolio-dark-border/40 select-none">
+        <div>
+          <h3 className="font-bold text-white text-lg">L'Élastique Sensoriel</h3>
+          <p className="text-xs text-spoolio-text-muted mt-0.5">
+            Pince et étire le fil avec ton doigt ou ta souris, puis relâche pour le faire vibrer.
+          </p>
+        </div>
+      </div>
+
+      {/* Canvas Wrapper */}
+      <div className="relative rounded-2xl overflow-hidden bg-slate-950 border border-slate-900">
+        <canvas
+          ref={elasticCanvasRef}
+          className="w-full block bg-slate-950 cursor-grab active:cursor-grabbing"
+          style={{ touchAction: 'none' }}
+        />
+        {/* Haptic indicator */}
+        <div className="absolute bottom-3 left-3 px-2 py-1 rounded bg-slate-900/80 border border-slate-800 text-[10px] text-spoolio-blue font-mono pointer-events-none select-none flex items-center gap-1">
+          <span>🪢 Simulation de Tensions Physiques</span>
+        </div>
+      </div>
+    </div>
+  );
+
   // Normal inline tab content
   return (
     <div className="w-full max-w-4xl mx-auto px-4 relative">
@@ -772,6 +1035,16 @@ export default function DigitalFidgets() {
         >
           🌌 Sable
         </button>
+        <button
+          onClick={() => handleTabTransition('elastic')}
+          className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm tracking-wider uppercase transition-all duration-200 cursor-pointer outline-none ${
+            activeTab === 'elastic'
+              ? 'bg-[#00f5ff] text-slate-950 shadow-md'
+              : 'text-spoolio-text-muted hover:text-foreground'
+          }`}
+        >
+          🪢 Élastique
+        </button>
       </div>
 
       {/* Render active fidget block */}
@@ -779,6 +1052,7 @@ export default function DigitalFidgets() {
         {activeTab === 'switchboard' && renderSwitchboard(false)}
         {activeTab === 'bubblewrap' && renderBubblewrap()}
         {activeTab === 'particles' && renderParticles()}
+        {activeTab === 'elastic' && renderElastic()}
       </div>
     </div>
   );
